@@ -10,14 +10,6 @@ import (
 //go:embed resc/input.txt
 var input string
 
-//func absDiff(a int, b int) int {
-//	if a > b {
-//		return a - b
-//	} else {
-//		return b - a
-//	}
-//}
-
 func remove(slice []int, index int) []int {
 	removed := make([]int, 0, len(slice)-1)
 	removed = append(removed, slice[:index]...)
@@ -40,13 +32,14 @@ func SplitLevels(report string) (levels []int) {
 }
 
 func AreSafeLevels(report []int, useProblemDampener bool) bool {
+	safe := true
 	dir := 1
 	var prev int
 	for i, v := range report {
 		diff := (v - prev) * dir
 		if diff < 0 && i == 1 {
 			if useProblemDampener && AreSafeLevels(remove(report, i), false) {
-				return true
+				break
 			} else {
 				dir = -1
 				diff *= dir
@@ -54,12 +47,26 @@ func AreSafeLevels(report []int, useProblemDampener bool) bool {
 		}
 
 		if (diff > 3 || diff <= 0) && i != 0 {
-			return useProblemDampener && AreSafeLevels(remove(report, i), false)
+			safe = false
+			break
 		}
 
 		prev = v
 	}
-	return true
+
+	if safe {
+		return safe
+	} else {
+		if !useProblemDampener {
+			return false
+		}
+		for i, _ := range report {
+			if AreSafeLevels(remove(report, i), false) {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 func main() {
