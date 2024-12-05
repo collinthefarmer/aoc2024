@@ -95,3 +95,95 @@ func TestToUpdates(t *testing.T) {
 		}
 	})
 }
+
+func TestIsValid(t *testing.T) {
+	rules := []PageOrderRule{
+		{47, 53},
+		{97, 13},
+		{97, 61},
+		{97, 47},
+		{75, 29},
+		{61, 13},
+		{75, 53},
+		{29, 13},
+		{97, 29},
+		{53, 29},
+		{61, 53},
+		{97, 53},
+		{61, 29},
+		{47, 13},
+		{75, 47},
+		{97, 75},
+		{47, 61},
+		{75, 61},
+		{47, 29},
+		{75, 13},
+		{53, 13},
+	}
+
+	t.Run("75,47,61,53,29", func(t *testing.T) {
+		update := Update{75, 47, 61, 53, 29}
+
+		got := update.IsValid(rules)
+		want := true
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("97,61,53,29,13", func(t *testing.T) {
+		update := Update{97, 61, 53, 29, 13}
+
+		got := update.IsValid(rules)
+		want := true
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("75,29,13", func(t *testing.T) {
+		update := Update{75, 29, 13}
+
+		got := update.IsValid(rules)
+		want := true
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("75,97,47,61,53", func(t *testing.T) {
+		update := Update{75, 97, 47, 61, 53}
+
+		got := update.IsValid(rules)
+		want := false
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("61,13,29", func(t *testing.T) {
+		update := Update{61, 13, 29}
+
+		got := update.IsValid(rules)
+		want := false
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("97,13,75,29,47", func(t *testing.T) {
+		update := Update{97, 13, 75, 29, 47}
+
+		got := update.IsValid(rules)
+		want := false
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+}

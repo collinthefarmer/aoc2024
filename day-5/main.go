@@ -10,6 +10,26 @@ type PageOrderRule [2]int
 
 type Update []int
 
+func (update *Update) IsValid(rules []PageOrderRule) bool {
+	ruleMap := map[int][]int{}
+	for _, rule := range rules {
+		ruleMap[rule[0]] = append(ruleMap[rule[0]], rule[1])
+	}
+
+	for i, num := range *update {
+		mayNotPreceed := ruleMap[num]
+		for p := range i {
+			for _, n := range mayNotPreceed {
+				if (*update)[p] == n {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
+}
+
 func ToPageOrderRules(text string) []PageOrderRule {
 	var rules []PageOrderRule
 	for _, line := range strings.Split(text, "\n") {
@@ -57,4 +77,11 @@ func ToUpdates(text string) []Update {
 var input string
 
 func main() {
+	components := strings.Split(input, "\n\n")
+
+	rules := ToPageOrderRules(components[0])
+	updates := ToUpdates(components[1])
+
+	print(rules)
+	print(updates)
 }
