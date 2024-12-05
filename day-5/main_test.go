@@ -187,3 +187,71 @@ func TestIsValid(t *testing.T) {
 		}
 	})
 }
+
+func TestMiddlePage(t *testing.T) {
+	t.Run("75,47,61,53,29", func(t *testing.T) {
+		update := Update{75, 47, 61, 53, 29}
+
+		got := update.MiddlePage()
+		want := 61
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("97,61,53,29,13", func(t *testing.T) {
+		update := Update{97, 61, 53, 29, 13}
+
+		got := update.MiddlePage()
+		want := 53
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("75,29,13", func(t *testing.T) {
+		update := Update{75, 29, 13}
+
+		got := update.MiddlePage()
+		want := 29
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("75,97,47,61,53", func(t *testing.T) {
+		update := Update{75, 97, 47, 61, 53}
+
+		got := update.MiddlePage()
+		want := 47
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("61,13,29", func(t *testing.T) {
+		update := Update{61, 13, 29}
+
+		got := update.MiddlePage()
+		want := 13
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("97,13,75,29,47", func(t *testing.T) {
+		update := Update{97, 13, 75, 29, 47}
+
+		got := update.MiddlePage()
+		want := 75
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+}

@@ -30,6 +30,10 @@ func (update *Update) IsValid(rules []PageOrderRule) bool {
 	return true
 }
 
+func (update *Update) MiddlePage() int {
+	return (*update)[len(*update)/2]
+}
+
 func ToPageOrderRules(text string) []PageOrderRule {
 	var rules []PageOrderRule
 	for _, line := range strings.Split(text, "\n") {
