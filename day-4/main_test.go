@@ -208,3 +208,26 @@ MXMXAXMASX
 		t.Errorf("found %v results, %v wanted", got, want)
 	}
 }
+
+func TestCountXResults(t *testing.T) {
+	input := `MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX
+`
+	term := "MAS"
+
+	searchResults := WordSearch(input, term)
+	got := CountCrossedResults(searchResults, term)
+	want := 9
+
+	if got != want {
+		t.Errorf("found %v results, %v wanted", got, want)
+	}
+}

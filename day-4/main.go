@@ -133,10 +133,42 @@ func WordSearch(text string, term string) []SearchResult {
 	return results
 }
 
+func CountCrossedResults(results []SearchResult, term string) int {
+	directionVectors := DirectionVectors()
+	termCenterSteps := len(term) / 2
+
+	centerCounts := map[CoordinatePair]int{}
+
+	var count int
+	for _, result := range results {
+		if result.Direction%2 == 0 {
+			// diagonals only
+			continue
+		}
+
+		step := directionVectors[result.Direction]
+		center := result.Position.Add(step.Mult(termCenterSteps))
+		centerCounts[center] += 1
+		if centerCounts[center] == 2 {
+			count += 1
+		}
+
+	}
+	return count
+}
+
 func main() {
 	searchText := input
 	searchTerm := "XMAS"
 
 	results := WordSearch(searchText, searchTerm)
 	fmt.Printf("Pt. 1: instances found: %v\n", len(results))
+
+	partTwoSearchTerm := "MAS"
+	partTwoResults := CountCrossedResults(
+		WordSearch(searchText, partTwoSearchTerm),
+		partTwoSearchTerm,
+	)
+
+	fmt.Printf("Pt. 2: instances found: %v\n", partTwoResults)
 }
