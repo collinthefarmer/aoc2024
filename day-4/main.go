@@ -2,8 +2,7 @@ package main
 
 import (
 	_ "embed"
-	//"fmt"
-	//"math"
+	"fmt"
 	"strings"
 )
 
@@ -23,17 +22,36 @@ const (
 	DIR_NW Direction = iota
 )
 
-type Matrix [][]string
-
 type CoordinatePair struct {
 	X int
 	Y int
+}
+
+func (cp *CoordinatePair) Add(v Vector) CoordinatePair {
+	return CoordinatePair{
+		X: cp.X + v.X,
+		Y: cp.Y + v.Y,
+	}
+}
+
+type Vector struct {
+	X int
+	Y int
+}
+
+func (v *Vector) Mult(value int) Vector {
+	return Vector{
+		X: v.X * value,
+		Y: v.Y * value,
+	}
 }
 
 type SearchResult struct {
 	Position  CoordinatePair
 	Direction Direction
 }
+
+type Matrix [][]string
 
 func (m *Matrix) Rows() int {
 	return len(*m)
@@ -43,86 +61,28 @@ func (m *Matrix) Columns() int {
 	return len((*m)[0])
 }
 
-func (m *Matrix) At(coordinates CoordinatePair) string {
-	return (*m)[coordinates.X][coordinates.Y]
+func (m *Matrix) At(coordinates CoordinatePair) (string, error) {
+	mat := *m
+	if coordinates.X >= mat.Columns() ||
+		coordinates.X < 0 ||
+		coordinates.Y >= mat.Rows() ||
+		coordinates.Y < 0 {
+		return "", nil
+	}
+	return mat[coordinates.Y][coordinates.X], nil
 }
 
-func (m *Matrix) DirectionalSubstr(start CoordinatePair, size int, dir Direction) string {
-	return ""
+func (m *Matrix) DirectionalSubstr(start CoordinatePair, size int, step Vector) string {
+	var substr string
+	for i := range size {
+		char, err := m.At(start.Add(step.Mult(i)))
+		if err != nil {
+			break
+		}
+		substr += char
+	}
+	return substr
 }
-
-//
-//func isValidSliceIndex(textLen int, textWidth int, sliceDir int, sliceStart int, index int) bool {
-//	var valid bool
-//	switch sliceDir {
-//	case DIR_N, DIR_S:
-//		valid = index >= 0 && index < textLen
-//	case DIR_NE:
-//		fmt.Printf("start:: index: %v, x: %v, y: %v\n", sliceStart, sliceStart%textWidth, sliceStart/textWidth)
-//		fmt.Printf("end:: index: %v, x: %v, y: %v\n\n", index, index%textWidth, index/textWidth)
-//		valid = index == sliceStart ||
-//			index < textLen && index >= 0 &&
-//				index/textWidth < sliceStart/textWidth &&
-//				index%textWidth > sliceStart%textWidth
-//	case DIR_E:
-//		valid = index < textLen &&
-//			index/textWidth == sliceStart/textWidth
-//	case DIR_W:
-//		valid = index >= 0 &&
-//			index/textWidth == sliceStart/textWidth
-//	}
-//	return valid
-//}
-//
-//func DirectionalSlice(text string, textLen int, textWidth int, dir int, start int, size int) string {
-//	var step int
-//	switch dir {
-//	case DIR_N:
-//		step = -(textWidth + 1) // +1 because of the newline character
-//	case DIR_NE:
-//		step = -(textWidth)
-//	case DIR_E:
-//		step = 1
-//	case DIR_W:
-//		step = -1
-//	case DIR_S:
-//		step = textWidth + 1
-//	default:
-//		return ""
-//	}
-//
-//	var slice string
-//	for i := range size {
-//		index := start + i*step
-//		if isValidSliceIndex(textLen, textWidth, dir, start, index) {
-//			slice += string(text[index])
-//		} else {
-//			break
-//		}
-//	}
-//
-//	return slice
-//}
-//
-//func directionalSearch(text string, textLen int, textWidth int, term string) []SearchResult {
-//	var results []SearchResult
-//	for i, char := range text {
-//		if char != rune(term[0]) {
-//			continue
-//		}
-//
-//		for dir := range DIR_NW {
-//			slice := DirectionalSlice(text, textLen, textWidth, dir, i, len(term))
-//			if slice == term {
-//				results = append(results, SearchResult{
-//					Position:  i,
-//					Direction: dir,
-//				})
-//			}
-//		}
-//	}
-//	return results
-//}
 
 func ToMatrix(text string) Matrix {
 	var matrix Matrix
@@ -137,13 +97,46 @@ func ToMatrix(text string) Matrix {
 	return matrix
 }
 
+func DirectionVectors() map[Direction]Vector {
+	return map[Direction]Vector{
+		DIR_N:  {Y: -1},
+		DIR_NE: {X: 1, Y: -1},
+		DIR_E:  {X: 1},
+		DIR_SE: {X: 1, Y: 1},
+		DIR_S:  {Y: 1},
+		DIR_SW: {X: -1, Y: 1},
+		DIR_W:  {X: -1},
+		DIR_NW: {X: -1, Y: -1},
+	}
+}
+
+func WordSearch(text string, term string) []SearchResult {
+	matrix := ToMatrix(text)
+	termLen := len(term)
+
+	var results []SearchResult
+	for dir, vector := range DirectionVectors() {
+		for iy := range matrix.Rows() {
+			for ix := range matrix.Columns() {
+				start := CoordinatePair{ix, iy}
+				substr := matrix.DirectionalSubstr(start, termLen, vector)
+				if substr == term {
+					results = append(results, SearchResult{
+						Direction: dir,
+						Position:  start,
+					})
+				}
+			}
+		}
+	}
+
+	return results
+}
+
 func main() {
-	//inputMatrix := ToMatrix(input)
-	//
-	//	searchTerm := "XMAS"
-	//
-	//	width := strings.Index(input, "\n")
-	//	results := directionalSearch(input, len(input), width, searchTerm)
-	//
-	//	fmt.Printf("Pt. 1: instances found: %v\n", len(results))
+	searchText := input
+	searchTerm := "XMAS"
+
+	results := WordSearch(searchText, searchTerm)
+	fmt.Printf("Pt. 1: instances found: %v\n", len(results))
 }

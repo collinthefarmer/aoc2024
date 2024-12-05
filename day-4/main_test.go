@@ -1,8 +1,31 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 )
+
+func TestAdd(t *testing.T) {
+	coords := CoordinatePair{0, 0}
+
+	got := coords.Add(Vector{1, 1})
+	want := CoordinatePair{1, 1}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got: %v, wanted: %v", got, want)
+	}
+}
+
+func TestMult(t *testing.T) {
+	vec := Vector{1, 2}
+
+	got := vec.Mult(2)
+	want := Vector{2, 4}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got: %v, wanted: %v", got, want)
+	}
+}
 
 func TestRows(t *testing.T) {
 	input := `MMMSXXMASM
@@ -61,12 +84,30 @@ MXMXAXMASX
 `
 	mat := ToMatrix(input)
 
-	got := mat.At(CoordinatePair{0, 0})
-	want := "M"
+	t.Run("should return string at valid coordinates", func(t *testing.T) {
+		got, _ := mat.At(CoordinatePair{0, 0})
+		want := "M"
 
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
+		if got != want {
+			t.Errorf("got %v, wanted %v", got, want)
+		}
+	})
+
+	t.Run("should return err at invalid coordinates", func(t *testing.T) {
+		_, err := mat.At(CoordinatePair{-1, 0})
+
+		if err != nil {
+			t.Error("expected error")
+		}
+	})
+
+	t.Run("should return err at invalid coordinates", func(t *testing.T) {
+		_, err := mat.At(CoordinatePair{11, 0})
+
+		if err != nil {
+			t.Error("expected error")
+		}
+	})
 }
 
 func TestDirectionalSubstr(t *testing.T) {
@@ -85,57 +126,59 @@ MXMXAXMASX
 	start := CoordinatePair{X: 5, Y: 5}
 	size := 4
 
+	dirs := DirectionVectors()
+
 	t.Run("DIR_N", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_N)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_N])
 		want := "XMSM"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_NE", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_NE)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_NE])
 		want := "XXSM"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_E", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_E)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_E])
 		want := "XXAM"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_SE", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_SE)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_SE])
 		want := "XSAM"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_S", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_S)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_S])
 		want := "XAAX"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_SW", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_SW)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_SW])
 		want := "XSAM"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_W", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_W)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_W])
 		want := "XMMA"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
 		}
 	})
 	t.Run("DIR_NW", func(t *testing.T) {
-		got := mat.DirectionalSubstr(start, size, DIR_NW)
+		got := mat.DirectionalSubstr(start, size, dirs[DIR_NW])
 		want := "XAMX"
 		if got != want {
 			t.Errorf("got %v, wanted %v", got, want)
@@ -143,90 +186,25 @@ MXMXAXMASX
 	})
 }
 
-//func TestDirectionalSlice(t *testing.T) {
-//	text := `MMMSXXMASM
-//MSAMXMSMSA
-//AMXSXMAAMM
-//MSAMASMSMX
-//XMASAMXAMM
-//XXAMMXXAMA
-//SMSMSASXSS
-//SAXAMASAAA
-//MAMMMXMMMM
-//MXMXAXMASX
-//`
-//	textLen := len(text)
-//	textWidth := strings.Index(text, "\n")
-//
-//	t.Run("DIR_N", func(t *testing.T) {
-//		want := "XMAS"
-//		got := DirectionalSlice(text, textLen, textWidth, DIR_N, 108, 4)
-//
-//		if got != want {
-//			t.Errorf("got: %v, want: %v", got, want)
-//		}
-//	})
-//
-//	t.Run("DIR_NE", func(t *testing.T) {
-//		want := "XMAS"
-//		got := DirectionalSlice(text, textLen, textWidth, DIR_NE, 108, 4)
-//
-//		if got != want {
-//			t.Errorf("got: %v, want: %v", got, want)
-//		}
-//	})
-//
-//	//	t.Run("DIR_E", func(t *testing.T) {
-//	//		want := "XMAS"
-//	//		got := DirectionalSlice(text, textLen, textWidth, DIR_E, 0, 4)
-//	//
-//	//		if got != want {
-//	//			t.Errorf("got: %v, want: %v", got, want)
-//	//		}
-//	//	})
-//	//
-//	//	t.Run("DIR_SE", func(t *testing.T) {
-//	//		want := "XMAS"
-//	//		got := DirectionalSlice(text, textLen, textWidth, DIR_SE, 0, 4)
-//	//
-//	//		if got != want {
-//	//			t.Errorf("got: %v, want: %v", got, want)
-//	//		}
-//	//	})
-//	//
-//	//	t.Run("DIR_S", func(t *testing.T) {
-//	//		want := "XMAS"
-//	//		got := DirectionalSlice(text, textLen, textWidth, DIR_S, 0, 4)
-//	//
-//	//		if got != want {
-//	//			t.Errorf("got: %v, want: %v", got, want)
-//	//		}
-//	//	})
-//	//
-//	//	t.Run("DIR_SW", func(t *testing.T) {
-//	//		want := "XMAS"
-//	//		got := DirectionalSlice(text, textLen, textWidth, DIR_SW, 0, 4)
-//	//
-//	//		if got != want {
-//	//			t.Errorf("got: %v, want: %v", got, want)
-//	//		}
-//	//	})
-//	//
-//	//	t.Run("DIR_W", func(t *testing.T) {
-//	//		want := "XMAS"
-//	//		got := DirectionalSlice(text, textLen, textWidth, DIR_W, 0, 4)
-//	//
-//	//		if got != want {
-//	//			t.Errorf("got: %v, want: %v", got, want)
-//	//		}
-//	//	})
-//	//
-//	//	t.Run("DIR_NW", func(t *testing.T) {
-//	//		want := "XMAS"
-//	//		got := DirectionalSlice(text, textLen, textWidth, DIR_NW, 0, 4)
-//	//
-//	//		if got != want {
-//	//			t.Errorf("got: %v, want: %v", got, want)
-//	//		}
-//	//	})
-//}
+func TestWordSearch(t *testing.T) {
+	input := `MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX
+`
+	term := "XMAS"
+
+	results := WordSearch(input, term)
+	got := len(results)
+	want := 18
+
+	if got != want {
+		t.Errorf("found %v results, %v wanted", got, want)
+	}
+}
