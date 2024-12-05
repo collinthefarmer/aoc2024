@@ -33,6 +33,26 @@ func ToPageOrderRules(text string) []PageOrderRule {
 	return rules
 }
 
+func ToUpdates(text string) []Update {
+	var updates []Update
+	for _, line := range strings.Split(text, "\n") {
+		if line == "" {
+			continue
+		}
+
+		var update Update
+		for _, s := range strings.Split(line, ",") {
+			updateI, err := strconv.Atoi(s)
+			if err != nil {
+				panic(err)
+			}
+			update = append(update, updateI)
+		}
+		updates = append(updates, update)
+	}
+	return updates
+}
+
 //go:embed resc/input.txt
 var input string
 

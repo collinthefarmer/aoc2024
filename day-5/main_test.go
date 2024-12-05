@@ -56,3 +56,42 @@ func TestToPageOrderRules(t *testing.T) {
 		}
 	})
 }
+
+func TestToUpdates(t *testing.T) {
+	input = `75,47,61,53,29
+97,61,53,29,13
+75,29,13
+75,97,47,61,53
+61,13,29
+97,13,75,29,47
+`
+
+	t.Run("should return correct number of Updates", func(t *testing.T) {
+		got := len(ToUpdates(input))
+		want := 6
+
+		if got != want {
+			t.Errorf("got %v, wanted %v", got, want)
+		}
+	})
+
+	t.Run("should return correct Updates", func(t *testing.T) {
+		updates := ToUpdates(input)
+		got := updates[0]
+		want := Update{75, 47, 61, 53, 29}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, wanted %v", got, want)
+		}
+	})
+
+	t.Run("should return correct Updates 2", func(t *testing.T) {
+		updates := ToUpdates(input)
+		got := updates[len(updates)-1]
+		want := Update{97, 13, 75, 29, 47}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, wanted %v", got, want)
+		}
+	})
+}
