@@ -255,3 +255,74 @@ func TestMiddlePage(t *testing.T) {
 		}
 	})
 }
+
+func TestSortToValid(t *testing.T) {
+	rules := []PageOrderRule{
+		{47, 53},
+		{97, 13},
+		{97, 61},
+		{97, 47},
+		{75, 29},
+		{61, 13},
+		{75, 53},
+		{29, 13},
+		{97, 29},
+		{53, 29},
+		{61, 53},
+		{97, 53},
+		{61, 29},
+		{47, 13},
+		{75, 47},
+		{97, 75},
+		{47, 61},
+		{75, 61},
+		{47, 29},
+		{75, 13},
+		{53, 13},
+	}
+
+	t.Run("75,97,47,61,53", func(t *testing.T) {
+		update := Update{75, 97, 47, 61, 53}
+		update.SortToValid(rules)
+
+		got := update
+		want := Update{97, 75, 47, 61, 53}
+
+		for i := range got {
+			if got[i] != want[i] {
+				t.Errorf("got %v, want %v", got, want)
+				break
+			}
+		}
+	})
+
+	t.Run("61,13,29", func(t *testing.T) {
+		update := Update{61, 13, 29}
+		update.SortToValid(rules)
+
+		got := update
+		want := Update{61, 29, 13}
+
+		for i := range got {
+			if got[i] != want[i] {
+				t.Errorf("got %v, want %v", got, want)
+				break
+			}
+		}
+	})
+
+	t.Run("97,13,75,29,47", func(t *testing.T) {
+		update := Update{97, 13, 75, 29, 47}
+		update.SortToValid(rules)
+
+		got := update
+		want := Update{97, 75, 47, 29, 13}
+
+		for i := range got {
+			if got[i] != want[i] {
+				t.Errorf("got %v, want %v", got, want)
+				break
+			}
+		}
+	})
+}

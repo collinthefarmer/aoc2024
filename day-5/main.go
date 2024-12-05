@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -10,17 +11,19 @@ type PageOrderRule [2]int
 
 type Update []int
 
-func (update *Update) IsValid(rules []PageOrderRule) bool {
+func (u *Update) IsValid(rules []PageOrderRule) bool {
 	ruleMap := map[int][]int{}
 	for _, rule := range rules {
 		ruleMap[rule[0]] = append(ruleMap[rule[0]], rule[1])
 	}
 
-	for i, num := range *update {
+	update := *u
+	for i, num := range update {
 		mayNotPreceed := ruleMap[num]
+
 		for p := range i {
 			for _, n := range mayNotPreceed {
-				if (*update)[p] == n {
+				if update[p] == n {
 					return false
 				}
 			}
@@ -28,6 +31,32 @@ func (update *Update) IsValid(rules []PageOrderRule) bool {
 	}
 
 	return true
+}
+
+func (u *Update) SortToValid(rules []PageOrderRule) {
+	ruleMap := map[int][]int{}
+	for _, rule := range rules {
+		ruleMap[rule[0]] = append(ruleMap[rule[0]], rule[1])
+	}
+
+	var changed bool
+	update := *u
+	for i, num := range update {
+		mayNotPreceed := ruleMap[num]
+
+		for p := range i {
+			for _, n := range mayNotPreceed {
+				if update[p] == n {
+					update[i], update[p] = update[p], update[i]
+					changed = true
+				}
+			}
+		}
+	}
+
+	if changed {
+		u.SortToValid(rules)
+	}
 }
 
 func (update *Update) MiddlePage() int {
@@ -86,6 +115,28 @@ func main() {
 	rules := ToPageOrderRules(components[0])
 	updates := ToUpdates(components[1])
 
-	print(rules)
-	print(updates)
+	// pt.1
+
+	var middlePageSum int
+	for _, update := range updates {
+		if update.IsValid(rules) {
+			middlePageSum += update.MiddlePage()
+		}
+	}
+
+	fmt.Printf("Pt. 1: Sum of middle pages: %v\n", middlePageSum)
+
+	// pt.2
+
+	var partTwoMiddlePageSum int
+	for _, update := range updates {
+		if update.IsValid(rules) {
+			continue
+		}
+
+		update.SortToValid(rules)
+		partTwoMiddlePageSum += update.MiddlePage()
+	}
+
+	fmt.Printf("Pt. 2: Sum of middle pages: %v\n", partTwoMiddlePageSum)
 }
